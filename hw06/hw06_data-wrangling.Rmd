@@ -1,0 +1,61 @@
+---
+title: 'STAT545 Homework 06: Data wrangling wrap up'
+output: github_document
+---
+
+### Load packages
+
+Load necessary packages.
+
+```{r message=FALSE}
+library(tidyverse)
+library(stringr)
+library(knitr)
+```
+
+## 1. Character data
+
+Read and work the exercises in the [Strings chapter or R for Data Science](http://r4ds.had.co.nz/strings.html).
+
+### String Basics Exercises
+
+**1. In code that doesn’t use stringr, you’ll often see `paste()` and `paste0()`. What’s the difference between the two functions? What stringr function are they equivalent to? How do the functions differ in their handling of NA?**
+
+`paste()` seperates strings by spaces while `paste0()` does not seperate strings by spaces. 
+
+```{r}
+paste("fried", "chicken")
+paste0("fried", "chicken")
+```
+
+They are similar to `str_c()`, where `paste0()` is more similar (does not seperate strings by spaces).
+
+```{r}
+str_c("fried", "chicken")
+```
+
+The paste functions convert NA to a string and treat it like a character vector. `str_c()` returns a missing value. 
+
+```{r}
+paste(NA, "chicken")
+paste0(NA, "chicken")
+str_c(NA, "chicken")
+```
+
+
+**2. In your own words, describe the difference between the sep and collapse arguments to str_c().**
+
+`sep` is the string inserted between arguments, and `collapse` is the string that combines arguments into a single string.
+
+**3. Use str_length() and str_sub() to extract the middle character from a string. What will you do if the string has an even number of characters?**
+
+```{r}
+
+```
+
+
+**4. What does str_wrap() do? When might you want to use it?**
+
+**5. What does str_trim() do? What’s the opposite of str_trim()?**
+
+**6. Write a function that turns (e.g.) a vector c("a", "b", "c") into the string a, b, and c. Think carefully about what it should do if given a vector of length 0, 1, or 2.**
