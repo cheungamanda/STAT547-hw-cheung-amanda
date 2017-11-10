@@ -98,13 +98,160 @@ robust_fit(p_dat2)
 It works! This function calculates the robust regression of life expectancy on year (with the earliest year of 1952).
 
 
+## 3. Work with the candy data
+
+TASK: Compare the joy/despair scores of different types of treats. 
+
+#### Examine the raw Candy Survey data
+
+Bring in the raw data.
+
+```{r}
+raw <- read_csv("CANDY-HIERARCHY-2015 SURVEY-Responses.csv",
+                col_types = cols(
+                  Timestamp = col_datetime("%m/%d/%Y %H:%M:%S")))
+```
+
+Glimpse of the data.
+
+```{r}
+glimpse(raw)
+```
+
+#### Data wrangling
+
+Create an ID for each participant and rename "How old are you?" to `age`.
+
+```{r}
+raw_id <- raw %>% 
+  mutate(id = rownames(raw)) %>%
+  rename(age = "How old are you?")
+```
+
+Clean the `age` data to be integers of data with two or less characters and drop the rows with NA.
+
+```{r}
+raw_id <- raw_id %>% 
+  filter(str_length(age) <= 2) %>% 
+  mutate(age = as.integer(age)) %>%
+  filter(!is.na(age))
+```
+
+Select data of interest from the Candy Survey. We will look at `id`, `age`, `bubble gum`, `snickers`, `fuzzy peaches`, `kale smoothie`, and `kit kat`, and rename the treats.
+
+```{r}
+candy_data <- raw_id %>% 
+  rename(bubble_gum = "[Bubble Gum]",
+         snickers = "[Snickers]",
+         fuzzy_peaches = "[Fuzzy Peaches]",
+         kale_smoothie = "[Kale smoothie]",
+         kit_kat = "[Kit Kat]") %>% 
+  dplyr::select(id, age, bubble_gum, snickers, fuzzy_peaches, kale_smoothie, kit_kat)
+
+candy_data
+```
+
+Clean up the candy data and drop all rows with NA.
+
+```{r}
+candy_data <- na.omit(candy_data)
+
+candy_data
+```
 
 
+#### Exploring/Analyzing
+
+First, let's examine the number of occurences of despair and join for bubble gum using `count()`.
+
+```{r}
+bubble_gum_count <- candy_data %>%
+  count(bubble_gum) %>% 
+  ## rename table headings
+  rename(bubble_gum = n,
+         score = bubble_gum)
+
+bubble_gum_count
+```
+
+We see that 3218 people scored bubble gum with `despair`, and 1182 with `joy`. 
+
+Let's look at snickers.
+
+```{r}
+snickers_count <- candy_data %>%
+  count(snickers) %>% 
+  ## rename table headings
+  rename(snickers = n, 
+         score = snickers)
+
+snickers_count
+```
+
+We can join these two tables using `inner_join()`.
+
+```{r}
+gum_and_snickers <- inner_join(bubble_gum_count, snickers_count)
+
+gum_and_snickers
+```
+
+Let's analyze the other treats using `count()`.
+
+```{r}
+count(candy_data, snickers)
+```
 
 
+```{r}
+fuzzy_peaches_count <- candy_data %>%
+  count(fuzzy_peaches) %>% 
+  ## rename table headings
+  rename(fuzzy_peaches = n,
+         score = fuzzy_peaches)
 
+kale_smoothie_count <- candy_data %>%
+  count(kale_smoothie) %>% 
+  ## rename table headings
+  rename(kale_smoothie = n,
+         score = kale_smoothie)
 
+kit_kat_count <- candy_data %>%
+  count(kit_kat) %>% 
+  ## rename table headings
+  rename(kit_kat = n,
+         score = kit_kat)
+```
 
+We want to create a combined table with the total counts of despair and joy for each treat. 
+ 
+```{r}
+candy_scores <- plyr::join_all(list(bubble_gum_count, snickers_count, fuzzy_peaches_count,
+              kale_smoothie_count, kit_kat_count),
+              by='score',
+              type='inner')
+
+candy_scores
+```
+ 
+Hooray! Let's plot this data!
+
+..... WAIT, not so soon! We need to reshape this data to properly plot it.
+
+```{r}
+candy_scores_gather <- gather(candy_scores, key = treat, value = count, bubble_gum:kit_kat)
+
+candy_scores_gather
+```
+
+Now it's ready to plot!
+
+```{r}
+candy_scores_gather %>% 
+  ggplot(aes(x = treat, y = count, fill = score)) +
+  geom_bar(stat="identity", position = "dodge") +
+  theme_bw()
+```
 
 
 
