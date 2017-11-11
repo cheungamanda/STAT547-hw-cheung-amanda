@@ -12,9 +12,14 @@ library(tidyverse)
 library(stringr)
 library(knitr)
 library(gapminder)
-library(testthat)
 library(ggplot2)
 library(MASS)
+library(repurrrsive)
+library(listviewer)
+library(jsonlite)
+library(dplyr)
+library(tibble)
+library(purrr)
 ```
 
 
@@ -100,7 +105,7 @@ It works! This function calculates the robust regression of life expectancy on y
 
 ## 3. Work with the candy data
 
-TASK: Compare the joy/despair scores of different types of treats. 
+#### TASK: Compare the joy/despair scores of different types of treats. 
 
 #### Examine the raw Candy Survey data
 
@@ -171,7 +176,7 @@ bubble_gum_count <- candy_data %>%
   rename(bubble_gum = n,
          score = bubble_gum)
 
-bubble_gum_count
+kable(bubble_gum_count)
 ```
 
 We see that 3218 people scored bubble gum with `despair`, and 1182 with `joy`. 
@@ -185,7 +190,7 @@ snickers_count <- candy_data %>%
   rename(snickers = n, 
          score = snickers)
 
-snickers_count
+kable(snickers_count)
 ```
 
 We can join these two tables using `inner_join()`.
@@ -193,15 +198,10 @@ We can join these two tables using `inner_join()`.
 ```{r}
 gum_and_snickers <- inner_join(bubble_gum_count, snickers_count)
 
-gum_and_snickers
+kable(gum_and_snickers)
 ```
 
 Let's analyze the other treats using `count()`.
-
-```{r}
-count(candy_data, snickers)
-```
-
 
 ```{r}
 fuzzy_peaches_count <- candy_data %>%
@@ -231,7 +231,7 @@ candy_scores <- plyr::join_all(list(bubble_gum_count, snickers_count, fuzzy_peac
               by='score',
               type='inner')
 
-candy_scores
+kable(candy_scores)
 ```
  
 Hooray! Let's plot this data!
@@ -241,7 +241,7 @@ Hooray! Let's plot this data!
 ```{r}
 candy_scores_gather <- gather(candy_scores, key = treat, value = count, bubble_gum:kit_kat)
 
-candy_scores_gather
+kable(candy_scores_gather)
 ```
 
 Now it's ready to plot!
@@ -250,15 +250,73 @@ Now it's ready to plot!
 candy_scores_gather %>% 
   ggplot(aes(x = treat, y = count, fill = score)) +
   geom_bar(stat="identity", position = "dodge") +
-  theme_bw()
+  theme_bw() +
+  labs(title = "Candy Survey Data",
+       fill = "Score",
+       x = "Treat",
+       y = "Number of responses") +
+  theme(plot.title = element_text(hjust=0.5)) +
+  scale_fill_brewer("Score", palette="Dark2")
 ```
 
+We can see that more individuals find joy in kit kat and snickers, than bubble gum, fuzzy peaches, and a kale smoothie (I think I do too). 
 
+## 5. Work with a list
 
+#### Simplifying data from a list of GitHub users
 
+Using the `repurrrsive` package, we will examine information on 6 GitHub users named `gh_users`. 
 
+#### Extract an element based on name or position
 
+Let's look at the elements with the name "login".
 
+```{r}
+gh_users %>%
+  map("login")
+```
+
+We can also use `map()` to look at an element based on its position.
+
+```{r}
+gh_users %>%
+  map(18)
+```
+
+The 18th element is the name for each user. 
+
+#### Type-specific map
+
+A type-specific `map()` returns an atomic vector, while `map()` returns a list. 
+
+We can use our examples above with `map_chr()` (since the elements are all characters) to return an atomic vector. 
+
+```{r}
+gh_users %>%
+  map_chr("login")
+
+gh_users %>%
+  map_chr(18)
+```
+
+#### Extract multiple values
+
+We will extract data from the 2 and 3rd users. We can use the single square bracket to index and a character vector to index by name.
+
+```{r}
+x <- map(gh_users, `[`, c("login", "name", "id", "location"))
+str(x[2:3])
+```
+
+#### Data frame output
+
+We can also return elements in a data frame with `map_df()`. 
+
+```{r}
+map_df(gh_users, `[`, c("login", "name", "id", "location"))
+```
+
+ALL DONE! Hope you learned something from this assignment! 
 
 
 

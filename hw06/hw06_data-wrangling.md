@@ -10,9 +10,14 @@ library(tidyverse)
 library(stringr)
 library(knitr)
 library(gapminder)
-library(testthat)
 library(ggplot2)
 library(MASS)
+library(repurrrsive)
+library(listviewer)
+library(jsonlite)
+library(dplyr)
+library(tibble)
+library(purrr)
 ```
 
 2. Writing functions
@@ -143,7 +148,7 @@ It works! This function calculates the robust regression of life expectancy on y
 3. Work with the candy data
 ---------------------------
 
-TASK: Compare the joy/despair scores of different types of treats.
+#### TASK: Compare the joy/despair scores of different types of treats.
 
 #### Examine the raw Candy Survey data
 
@@ -373,14 +378,13 @@ bubble_gum_count <- candy_data %>%
   rename(bubble_gum = n,
          score = bubble_gum)
 
-bubble_gum_count
+kable(bubble_gum_count)
 ```
 
-    ## # A tibble: 2 x 2
-    ##     score bubble_gum
-    ##     <chr>      <int>
-    ## 1 DESPAIR       3218
-    ## 2     JOY       1182
+| score   |  bubble\_gum|
+|:--------|------------:|
+| DESPAIR |         3218|
+| JOY     |         1182|
 
 We see that 3218 people scored bubble gum with `despair`, and 1182 with `joy`.
 
@@ -393,14 +397,13 @@ snickers_count <- candy_data %>%
   rename(snickers = n, 
          score = snickers)
 
-snickers_count
+kable(snickers_count)
 ```
 
-    ## # A tibble: 2 x 2
-    ##     score snickers
-    ##     <chr>    <int>
-    ## 1 DESPAIR      574
-    ## 2     JOY     3826
+| score   |  snickers|
+|:--------|---------:|
+| DESPAIR |       574|
+| JOY     |      3826|
 
 We can join these two tables using `inner_join()`.
 
@@ -411,26 +414,15 @@ gum_and_snickers <- inner_join(bubble_gum_count, snickers_count)
     ## Joining, by = "score"
 
 ``` r
-gum_and_snickers
+kable(gum_and_snickers)
 ```
 
-    ## # A tibble: 2 x 3
-    ##     score bubble_gum snickers
-    ##     <chr>      <int>    <int>
-    ## 1 DESPAIR       3218      574
-    ## 2     JOY       1182     3826
+| score   |  bubble\_gum|  snickers|
+|:--------|------------:|---------:|
+| DESPAIR |         3218|       574|
+| JOY     |         1182|      3826|
 
 Let's analyze the other treats using `count()`.
-
-``` r
-count(candy_data, snickers)
-```
-
-    ## # A tibble: 2 x 2
-    ##   snickers     n
-    ##      <chr> <int>
-    ## 1  DESPAIR   574
-    ## 2      JOY  3826
 
 ``` r
 fuzzy_peaches_count <- candy_data %>%
@@ -460,12 +452,13 @@ candy_scores <- plyr::join_all(list(bubble_gum_count, snickers_count, fuzzy_peac
               by='score',
               type='inner')
 
-candy_scores
+kable(candy_scores)
 ```
 
-    ##     score bubble_gum snickers fuzzy_peaches kale_smoothie kit_kat
-    ## 1 DESPAIR       3218      574          3139          4141     441
-    ## 2     JOY       1182     3826          1261           259    3959
+| score   |  bubble\_gum|  snickers|  fuzzy\_peaches|  kale\_smoothie|  kit\_kat|
+|:--------|------------:|---------:|---------------:|---------------:|---------:|
+| DESPAIR |         3218|       574|            3139|            4141|       441|
+| JOY     |         1182|      3826|            1261|             259|      3959|
 
 Hooray! Let's plot this data!
 
@@ -474,20 +467,21 @@ Hooray! Let's plot this data!
 ``` r
 candy_scores_gather <- gather(candy_scores, key = treat, value = count, bubble_gum:kit_kat)
 
-candy_scores_gather
+kable(candy_scores_gather)
 ```
 
-    ##      score         treat count
-    ## 1  DESPAIR    bubble_gum  3218
-    ## 2      JOY    bubble_gum  1182
-    ## 3  DESPAIR      snickers   574
-    ## 4      JOY      snickers  3826
-    ## 5  DESPAIR fuzzy_peaches  3139
-    ## 6      JOY fuzzy_peaches  1261
-    ## 7  DESPAIR kale_smoothie  4141
-    ## 8      JOY kale_smoothie   259
-    ## 9  DESPAIR       kit_kat   441
-    ## 10     JOY       kit_kat  3959
+| score   | treat          |  count|
+|:--------|:---------------|------:|
+| DESPAIR | bubble\_gum    |   3218|
+| JOY     | bubble\_gum    |   1182|
+| DESPAIR | snickers       |    574|
+| JOY     | snickers       |   3826|
+| DESPAIR | fuzzy\_peaches |   3139|
+| JOY     | fuzzy\_peaches |   1261|
+| DESPAIR | kale\_smoothie |   4141|
+| JOY     | kale\_smoothie |    259|
+| DESPAIR | kit\_kat       |    441|
+| JOY     | kit\_kat       |   3959|
 
 Now it's ready to plot!
 
@@ -495,7 +489,140 @@ Now it's ready to plot!
 candy_scores_gather %>% 
   ggplot(aes(x = treat, y = count, fill = score)) +
   geom_bar(stat="identity", position = "dodge") +
-  theme_bw()
+  theme_bw() +
+  labs(title = "Candy Survey Data",
+       fill = "Score",
+       x = "Treat",
+       y = "Number of responses") +
+  theme(plot.title = element_text(hjust=0.5)) +
+  scale_fill_brewer("Score", palette="Dark2")
 ```
 
-![](hw06_data-wrangling_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-23-1.png)
+![](hw06_data-wrangling_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-22-1.png)
+
+We can see that more individuals find joy in kit kat and snickers, than bubble gum, fuzzy peaches, and a kale smoothie (I think I do too).
+
+5. Work with a list
+-------------------
+
+#### Simplifying data from a list of GitHub users
+
+Using the `repurrrsive` package, we will examine information on 6 GitHub users named `gh_users`.
+
+#### Extract an element based on name or position
+
+Let's look at the elements with the name "login".
+
+``` r
+gh_users %>%
+  map("login")
+```
+
+    ## [[1]]
+    ## [1] "gaborcsardi"
+    ## 
+    ## [[2]]
+    ## [1] "jennybc"
+    ## 
+    ## [[3]]
+    ## [1] "jtleek"
+    ## 
+    ## [[4]]
+    ## [1] "juliasilge"
+    ## 
+    ## [[5]]
+    ## [1] "leeper"
+    ## 
+    ## [[6]]
+    ## [1] "masalmon"
+
+We can also use `map()` to look at an element based on its position.
+
+``` r
+gh_users %>%
+  map(18)
+```
+
+    ## [[1]]
+    ## [1] "Gábor Csárdi"
+    ## 
+    ## [[2]]
+    ## [1] "Jennifer (Jenny) Bryan"
+    ## 
+    ## [[3]]
+    ## [1] "Jeff L."
+    ## 
+    ## [[4]]
+    ## [1] "Julia Silge"
+    ## 
+    ## [[5]]
+    ## [1] "Thomas J. Leeper"
+    ## 
+    ## [[6]]
+    ## [1] "Maëlle Salmon"
+
+The 18th element is the name for each user.
+
+#### Type-specific map
+
+A type-specific `map()` returns an atomic vector, while `map()` returns a list.
+
+We can use our examples above with `map_chr()` (since the elements are all characters) to return an atomic vector.
+
+``` r
+gh_users %>%
+  map_chr("login")
+```
+
+    ## [1] "gaborcsardi" "jennybc"     "jtleek"      "juliasilge"  "leeper"     
+    ## [6] "masalmon"
+
+``` r
+gh_users %>%
+  map_chr(18)
+```
+
+    ## [1] "Gábor Csárdi"           "Jennifer (Jenny) Bryan"
+    ## [3] "Jeff L."                "Julia Silge"           
+    ## [5] "Thomas J. Leeper"       "Maëlle Salmon"
+
+#### Extract multiple values
+
+We will extract data from the 2 and 3rd users. We can use the single square bracket to index and a character vector to index by name.
+
+``` r
+x <- map(gh_users, `[`, c("login", "name", "id", "location"))
+str(x[2:3])
+```
+
+    ## List of 2
+    ##  $ :List of 4
+    ##   ..$ login   : chr "jennybc"
+    ##   ..$ name    : chr "Jennifer (Jenny) Bryan"
+    ##   ..$ id      : int 599454
+    ##   ..$ location: chr "Vancouver, BC, Canada"
+    ##  $ :List of 4
+    ##   ..$ login   : chr "jtleek"
+    ##   ..$ name    : chr "Jeff L."
+    ##   ..$ id      : int 1571674
+    ##   ..$ location: chr "Baltimore,MD"
+
+#### Data frame output
+
+We can also return elements in a data frame with `map_df()`.
+
+``` r
+map_df(gh_users, `[`, c("login", "name", "id", "location"))
+```
+
+    ## # A tibble: 6 x 4
+    ##         login                   name       id               location
+    ##         <chr>                  <chr>    <int>                  <chr>
+    ## 1 gaborcsardi           Gábor Csárdi   660288         Chippenham, UK
+    ## 2     jennybc Jennifer (Jenny) Bryan   599454  Vancouver, BC, Canada
+    ## 3      jtleek                Jeff L.  1571674           Baltimore,MD
+    ## 4  juliasilge            Julia Silge 12505835     Salt Lake City, UT
+    ## 5      leeper       Thomas J. Leeper  3505428 London, United Kingdom
+    ## 6    masalmon          Maëlle Salmon  8360597       Barcelona, Spain
+
+ALL DONE! Hope you learned something from this assignment!
