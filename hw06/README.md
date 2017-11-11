@@ -1,7 +1,7 @@
 Homework 06 Process
 ================
 
-Here is the link to [homework 06](https://github.com/cheungamanda/STAT547-hw-cheung-amanda/tree/master/hw06)!
+Here is the link to [homework 06](https://github.com/cheungamanda/STAT547-hw-cheung-amanda/blob/master/hw06/hw06_data-wrangling.md)!
 
 #### Writing functions
 
