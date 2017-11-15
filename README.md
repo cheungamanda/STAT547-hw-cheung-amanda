@@ -4,4 +4,7 @@
 
 Data wrangling wrap up
 
+[Homework 07](https://github.com/cheungamanda/STAT547-hw-cheung-amanda/tree/master/hw07)
+
+Automating data-analysis pipelines
 
