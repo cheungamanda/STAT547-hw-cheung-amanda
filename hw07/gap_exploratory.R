@@ -4,16 +4,15 @@
 library(tidyverse)
 library(ggplot2)
 library(forcats)
+library(knitr)
 
 ## Load gapminder data
-gapminder <- read_tsv("hw07/gapminder.tsv")
+gapminder <- read_tsv("gapminder.tsv")
 
 ## Convert country and continent to factors
 gapminder <- gapminder %>%
   mutate(country = factor(country),
          continent = factor(continent))
-
-
 
 ## Population of European countries in 2002
 euro_pop_2002 <- gapminder %>%

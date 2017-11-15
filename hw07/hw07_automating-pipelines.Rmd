@@ -1,0 +1,25 @@
+---
+title: "Hw07: Automating Data-analysis Pipelines"
+author: "Amanda Cheung"
+date: "11/15/2017"
+output: github_document
+---
+
+This assignment investigated the overall population trends in the Gapminder data. 
+
+#### Load the data
+
+Gapminder data was brought in and factorised.
+```{r message=FALSE}
+gapminder <- read_tsv("gapminder.tsv")
+gapminder <- gapminder %>%
+  mutate(country = factor(country),
+         continent = factor(continent))
+str(gapminder)
+```
+
+#### Exploratory analyses
+
+Data exploration was performed and plotted.
+
+
