@@ -61,9 +61,3 @@ min_europe <- pop_fit_total %>%
   arrange(slope) %>% 
   head(3)
 
-  
-
-
-
-
-

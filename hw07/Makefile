@@ -13,7 +13,7 @@ pop_fit_total.RDS: gap_statistical.R euro_pop_2002.png GDP_oceania.png GDP_lifeE
 		Rscript $<
 		
 europe_fit.png: gap_figures.R gap_statistical.R euro_pop_2002.png GDP_oceania.png GDP_lifeExp.png pop_lifeExp_2007.png gap_reorder.RDS gapminder.tsv
-		Rscript -e 'rmarkdown::render("words.en.rmd")'
+		Rscript S<
 	
 hw07_automating-pipelines.md: hw07_automating-pipelines.Rmd gap_figures.R gap_statistical.R euro_pop_2002.png GDP_oceania.png GDP_lifeExp.png pop_lifeExp_2007.png gap_reorder.RDS gapminder.tsv
 		Rscript -e 'rmarkdown::render("$<")'

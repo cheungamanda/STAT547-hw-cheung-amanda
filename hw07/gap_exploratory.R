@@ -68,17 +68,12 @@ GDP_lifeExp <- gapminder %>%
 ggsave("GDP_lifeExp.png", GDP_lifeExp)
 
 ## Reorder countries by maximum population in descending order
-fct_reorder(gapminder$country, gapminder$pop, max, .desc = TRUE) %>% 
+gap_reorder <- gapminder %>% 
+  mutate(country = fct_reorder(country, pop, max, .desc = TRUE))
+
+gap_reorder %>% 
   levels() %>%
   head(10) %>% 
   kable()
 
-
-
-
-
-
-
-
-
-
+saveRDS(gap_reorder, "hw07/gap_reorder.RDS")
