@@ -1,23 +1,45 @@
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Old movie database"),
+  titlePanel("Movie Explorer (old releases)"),
   
-  sidebarPanel(h3("Filter movies"),
-               img(src = "cinema.jpg", width = "100%"),
+  # Sidebar elements
+  # Sidebar title
+  sidebarPanel(h4("FILTER MOVIES"),
+               # Sidebar image
+               img(src = "theatre.gif", width = "100%"),
+               # Year of release slider
                sliderInput("Year", "Year of release",
                            min = 1890, max = 2005,
                            value = c(1970, 2000)),
+               # Movie length slider
                sliderInput("Length", "Length in minutes",
-                           min = 0, max = 5500,
-                           value = c(60, 180), post = "mins"),
+                           min = 0, max = 3000,
+                           value = c(60, 180), post = " mins"),
+               # Votes slider
                sliderInput("Votes", "Minimum number of IMDB users who rated this movie",
                            min = 0, max = 160000,
-                           value = 1000, step = 100)),
+                           value = 1000, step = 100, post = " votes"),
+               # Genre checkboxes
+               h5("Genre"),
+               checkboxInput("Action", "Action", value = TRUE),
+               checkboxInput("Animation", "Animation", value = FALSE),
+               checkboxInput("Comedy", "Comedy", value = FALSE),
+               checkboxInput("Drama", "Drama", value = TRUE),
+               checkboxInput("Documentary", "Documentary", value = FALSE),
+               checkboxInput("Romance", "Romance", value = FALSE),
+               checkboxInput("Short", "Short", value = FALSE)),
   
+  # Main panel elements
   mainPanel(
-    plotOutput("hist_rating"),
-    br(), br(),
-    tableOutput("table_head"))
-
+    # Tab elements
+    tabsetPanel(
+      # Plots tab
+      tabPanel("Plots", plotOutput("hist_rating"),
+               br(), br(),
+               plotOutput("plot_votes"),
+               br(), br()),
+      # Summary table tab
+      tabPanel("Summary Table", DT::dataTableOutput("table_head"))) 
+    )
 )
