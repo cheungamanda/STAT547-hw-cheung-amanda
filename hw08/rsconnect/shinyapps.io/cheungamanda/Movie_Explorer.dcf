@@ -1,0 +1,12 @@
+name: Movie_Explorer
+title: Movie_Explorer
+username:
+account: cheungamanda
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 238088
+bundleId: 1086923
+url: https://cheungamanda.shinyapps.io/Movie_Explorer/
+when: 1511228289.51336
+asMultiple: FALSE
+asStatic: FALSE
