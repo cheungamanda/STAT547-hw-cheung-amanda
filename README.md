@@ -15,3 +15,7 @@ Building a Shiny app
 [Homework 09](https://github.com/cheungamanda/STAT547-hw-cheung-amanda/tree/master/hw09)
 
 Building your own R package
+
+[Homework 10](https://github.com/cheungamanda/STAT547-hw-cheung-amanda/tree/master/hw10)
+
+Data from the web
