@@ -1,0 +1,159 @@
+---
+title: 'Homework 10: Data from the Web'
+output: github_document
+---
+
+### Load packages
+
+Load necessary packages.
+
+```{r message=FALSE}
+library(tidyverse)
+library(magrittr)
+library(purrr)
+library(glue)
+library(stringr)
+library(rvest)
+library(xml2)
+library(ggplot2)
+library(knitr)
+```
+
+## Scrape data
+
+### Billboard The Hot 100
+
+Extract data from [Billboard The Hot 100](https://www.billboard.com/charts/hot-100). 
+
+```{r}
+hot_100 <- read_html("https://www.billboard.com/charts/hot-100")
+```
+
+### Song name
+
+Let's get a list of the top 10 song names!
+
+```{r}
+song_name <- hot_100 %>% 
+  html_nodes(".chart-row__song") %>% 
+  html_text()
+
+head(song_name, 10)
+```
+
+### Artist name
+
+Extract a list of the corresponding arist names.
+
+```{r}
+artist_name <- hot_100 %>% 
+  html_nodes(".chart-row__artist") %>% 
+  html_text()
+
+head(artist_name, 10)
+```
+
+We will remove the leading and trailing whitespace.
+
+```{r}
+artist_name_mod <- hot_100 %>% 
+  html_nodes(".chart-row__artist") %>% 
+  html_text() %>% 
+  trimws(which = c("both")) ## remove leading and trailing whitespace
+
+head(artist_name_mod, 10)
+```
+
+### Ranking
+
+Let's look at the current ranking for each song.
+
+```{r}
+current_week <- hot_100 %>% 
+  html_nodes(".chart-row__current-week") %>% 
+  html_text()
+
+head(current_week, 10)
+```
+
+### Weeks on Chart
+
+Let's also look at the number of weeks the song has been on the chart.
+
+```{r}
+weeks_on_chart <- hot_100 %>% 
+  html_nodes(".chart-row__weeks-on-chart") %>% 
+  html_text()
+
+head(weeks_on_chart, 10)
+```
+
+We will extract the week on charts value.
+
+```{r}
+weeks_on_chart_mod <- hot_100 %>% 
+  html_nodes(".chart-row__weeks-on-chart") %>% 
+  html_text() %>% 
+  str_sub(-3,-2) %>% ## extract weeks on chart value
+  trimws(which = c("both")) ## trim whitespace for single digits
+
+head(weeks_on_chart_mod, 10)
+```
+
+### Dataframe
+
+We can put our data together into a data frame. Let's take a look at the top 40 hits!
+
+```{r}
+song_df <- data.frame(Ranking = as.numeric(current_week),
+                      Weeks_on_chart = as.numeric(weeks_on_chart_mod),
+                      Song = song_name,
+                      Artist = artist_name_mod)
+
+song_df %>% 
+  head(40) %>% ## top 40 songs
+  kable()
+```
+
+
+### Data analysis
+
+Plot the top 20 songs to the number of weeks it's been on the chart.
+
+```{r}
+song_df %>% 
+  head(20) %>% 
+  ggplot(aes(x=Song, y=Weeks_on_chart)) +
+  geom_point(shape=21, aes(size=Ranking, fill=Ranking)) +
+  theme_bw() +
+  labs(title = "Top 20 Hits vs. Weeks on Chart",
+       fill = "Ranking",
+       size = "Ranking",
+       x = "Song Name",
+       y = "Weeks on Chart") +
+  theme(plot.title = element_text(hjust=0.5),
+        axis.text.x = element_text(angle=45, hjust=1)) +
+  scale_fill_distiller(palette="YlGnBu")
+```
+
+It makes sense that the mid ranked songs have been on the charts longer. People lose interest and want to hear new music!
+
+Let's look at that comparison closely!
+
+```{r}
+song_df %>% 
+  ggplot(aes(x=Ranking, y=Weeks_on_chart)) +
+  geom_col(fill="pink", colour="white") +
+  theme_bw() +
+  labs(title = "Ranking vs. Weeks on Chart",
+       x = "Ranking",
+       y = "Weeks on Chart") +
+  theme(plot.title = element_text(hjust=0.5))
+
+```
+
+Confirmed! Songs ranked around 25-50 have been on the charts for the longest period of time. Almost 6 months to a year! The songs at the bottom of the chart are probably new releases, slowly making their way up the charts.
+
+
+
+
