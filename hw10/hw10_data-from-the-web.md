@@ -141,8 +141,8 @@ head(weeks_on_chart_mod, 10)
 We can put our data together into a data frame. Let's take a look at the top 40 hits!
 
 ``` r
-song_df <- data.frame(Ranking = as.numeric(current_week),
-                      Weeks_on_chart = as.numeric(weeks_on_chart_mod),
+song_df <- data.frame(Ranking = as.numeric(current_week), ## convert to numeric
+                      Weeks_on_chart = as.numeric(weeks_on_chart_mod), ## convert to numeric
                       Song = song_name,
                       Artist = artist_name_mod)
 
